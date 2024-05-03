@@ -63,12 +63,14 @@
                   <div class="grid--50-50">
                     <label for="password">Mot de passe</label>
                     <div class="reset-pass">
-                      <span><NuxtLink to="/forgot">Mot de passe oublie ?</NuxtLink></span>
+                      <span>
+                        <NuxtLink to="/forgot">Mot de passe oublie ?</NuxtLink>
+                      </span>
                     </div>
                   </div>
                   <div class="relative flex items-stretch">
-                    <input :type="passwordType" name="password" v-model="password" class="border rounded-l-md py-2 px-3 w-full"
-                      placeholder="Saisissez votre mot de passe">
+                    <input :type="passwordType" name="password" v-model="password"
+                      class="border rounded-l-md py-2 px-3 w-full" placeholder="Saisissez votre mot de passe">
                     <button @click="togglePassword()" type="button"
                       class="border-l border-white-700  focus:ring-4 focus:outline-none focus:ring-white-300 font-medium text-sm p-2.5 text-center inline-flex items-center absolute right-0 top-0 bottom-0 dark:border-white-500 dark:text-white-500 dark:hover:text-white dark:focus:ring-white-800 ">
                       <svg v-if="passwordType === 'password'" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -98,13 +100,6 @@
                   </button>
                 </div>
               </div>
-            </div>
-            <div class="footer-link padding-top--24">
-              <span>Pas encore de compte ? <NuxtLink to="/creation">Registration</NuxtLink></span>
-              <!-- <div class="listing padding-top--24 padding-bottom--24 flex-flex center-center">
-                <span><a href="#">Contact</a></span>
-                <span><a href="#">Privacy & terms</a></span>
-              </div> -->
             </div>
           </div>
         </div>
