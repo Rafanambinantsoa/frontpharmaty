@@ -617,6 +617,63 @@ const sendSingleQr = async (id) => {
     }
 }
 
+const reservations = ref(null);
+const getList = async (id) => {
+    try {
+        const response = await $fetch(`http://localhost:8000/api/reservation/list/${id}`, {
+            headers: {
+                'Authorization': 'Bearer ' + token.value
+            }
+        });
+
+        if (response) {
+            listRes.showModal();
+            reservations.value = response;
+            console.log(response);
+            // Afficher le modal ici si nécessaire
+        }
+    } catch (error) {
+        console.error("Une erreur s'est produite lors de la récupération des données :", error);
+    }
+};
+
+const getListPrev = async () => {
+    if (reservations.value.pagination.prev_page_url) {
+        try {
+            const response = await $fetch(reservations.value.pagination.prev_page_url, {
+                headers: {
+                    'Authorization': 'Bearer ' + token.value
+                }
+            });
+
+            if (response) {
+                reservations.value = response;
+            }
+        } catch (error) {
+            console.error("Une erreur s'est produite lors de la récupération des données de la page précédente :", error);
+        }
+    }
+};
+
+const getListNext = async () => {
+    if (reservations.value.pagination.next_page_url) {
+        try {
+            const response = await $fetch(reservations.value.pagination.next_page_url, {
+                headers: {
+                    'Authorization': 'Bearer ' + token.value
+                }
+            });
+            console.log(response);
+
+            if (response) {
+                reservations.value = response;
+            }
+        } catch (error) {
+            console.error("Une erreur s'est produite lors de la récupération des données de la page suivante :", error);
+        }
+    }
+};
+
 
 
 </script>
@@ -754,6 +811,64 @@ const sendSingleQr = async (id) => {
     <!-- End Nav -->
     <!-- Start Main -->
     <main class="container mx-w-6xl mx-auto py-4">
+        <!-- modal liste des gens premier scan tout simplement   -->
+        <dialog id="listRes" class="modal">
+            <form method="dialog" class="modal-box w-11/12 max-w-5xl">
+                <h3 class="font-bold text-lg"> La liste des pharmaciens ayant fais leurs reservations </h3>
+                <ul class="max-w-50 divide-y divide-gray-200 dark:divide-gray-700">
+                    <li v-if="reservations" v-for="(presen, id) in reservations.data" :key="id" class="py-3 sm:py-4">
+                        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                                    {{ presen.firstname }} {{ presen.lastname }}
+                                </p>
+                                <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                                    {{ presen.email }}
+                                </p>
+                            </div>
+                            <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                                {{ presen.phone }}
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+                <div class="flex flex-row mx-auto">
+                    <button type="button" @click="getListPrev()"
+                        class="bg-gray-800 text-white rounded-l-md border-r border-gray-100 py-2 hover:bg-red-700 hover:text-white px-3">
+                        <div class="flex flex-row align-middle">
+                            <svg class="w-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                    d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            <p class="ml-2">Prev</p>
+                        </div>
+                    </button>
+                    <button type="button" @click="getListNext()"
+                        class="bg-gray-800 text-white rounded-r-md py-2 border-l border-gray-200 hover:bg-red-700 hover:text-white px-3">
+                        <div class="flex flex-row align-middle">
+                            <span class="mr-2">Next</span>
+                            <svg class="w-5 ml-2" fill="currentColor" viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+
+
+                <div class="modal-action">
+
+                    <!-- if there is a button, it will close the modal -->
+                    <button class="btn">Fermer</button>
+                </div>
+            </form>
+        </dialog>
 
         <!-- MOdal recherche  -->
         <dialog id="searchMe" class="modal">
@@ -1274,6 +1389,7 @@ const sendSingleQr = async (id) => {
                                 <th scope="col" class="px-6 py-3">
                                     <span class="sr-only">Consulter</span>
                                 </th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1291,6 +1407,11 @@ const sendSingleQr = async (id) => {
                                 </td>
                                 <td class="px-6 py-4">
                                     {{ cour.lieu }}
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a @click="getList(cour.id)" href="#"
+                                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Les
+                                        reservations</a>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <a @click="oneEvent(cour.id)" href="#"
@@ -1356,6 +1477,7 @@ const sendSingleQr = async (id) => {
                                 <th scope="col" class="px-6 py-3">
                                     Phone
                                 </th>
+                                <th>Points</th>
                                 <th></th>
 
                             </tr>
@@ -1372,6 +1494,9 @@ const sendSingleQr = async (id) => {
                                 </td>
                                 <td class="px-6 py-4">
                                     {{ dean.email }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ dean.phone }}
                                 </td>
                                 <td class="px-6 py-4">
                                     {{ dean.points_total }}
