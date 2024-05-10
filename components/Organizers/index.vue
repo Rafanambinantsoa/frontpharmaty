@@ -8,7 +8,7 @@ import { uri } from '~/stores/uri';
 //Nom admin
 const token = useCookie("token");
 const users = await useAsyncData("Users", () =>
-    $fetch(`https://backpharma.onrender.com/api/user`, {
+    $fetch(`http://localhost:8000/api/user`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         }
@@ -24,7 +24,7 @@ function logout() {
 
 //Pour obtenir le nombre d'evenement que l'utilisateurs a  creer
 const nbEventTotal = await useAsyncData("nbEventtotal", () =>
-    $fetch(`https://backpharma.onrender.com/api/count`, {
+    $fetch(`http://localhost:8000/api/count`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         }
@@ -33,7 +33,7 @@ const nbEventTotal = await useAsyncData("nbEventtotal", () =>
 
 //Les nombres des events encours
 const nbUsers = await useAsyncData("nbEventcours", () =>
-    $fetch(`https://backpharma.onrender.com/api/client/count`, {
+    $fetch(`http://localhost:8000/api/client/count`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         }
@@ -68,7 +68,7 @@ const getPreviousEvents = async () => {
 
 // Récupérer les données initiales
 const fetchInitialData = async () => {
-    const response = await $fetch(`https://backpharma.onrender.com/api/eventEncoursPaginated`, {
+    const response = await $fetch(`http://localhost:8000/api/eventEncoursPaginated`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         }
@@ -79,12 +79,13 @@ const fetchInitialData = async () => {
 onMounted(() => {
     fetchInitialData();
     fetchInitialDataAll()
+    console.log(all)
 })
 
 //Paginate tout les events j'ai creer
 const all = ref([]);
 
-const getNextEventsAll = async () => {
+const getNextUser = async () => {
     if (!all.value.next_page_url) return;
     const response = await $fetch(all.value.next_page_url, {
         headers: {
@@ -96,7 +97,8 @@ const getNextEventsAll = async () => {
 
 };
 
-const getPreviousEventsAll = async () => {
+const getPreviousUser = async () => {
+    console.log(all.value)
     if (!all.value.prev_page_url) return;
     const response = await $fetch(all.value.prev_page_url, {
         headers: {
@@ -106,15 +108,29 @@ const getPreviousEventsAll = async () => {
     all.value = response;
 };
 
+
 // Récupérer les données initiales
 const fetchInitialDataAll = async () => {
-    const response = await $fetch(`https://backpharma.onrender.com/api/user/all`, {
-        headers: {
-            'Authorization': 'Bearer ' + token.value
+    try {
+        const response = await fetch('http://localhost:8000/api/user/all', {
+            headers: {
+                'Authorization': 'Bearer ' + token.value
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
         }
-    });
-    all.value = response;
-};
+
+        const responseData = await response.json();
+
+        // Stocker les données mises à jour dans la variable all.value
+        all.value = responseData;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
 
 let sam = {
     titre: '',
@@ -176,7 +192,7 @@ const creerEvent = () => {
     formData.append('description', sam.description);
     formData.append('lieu', sam.lieu);
     formData.append('user_id', users.data.value.id);
-    useFetch(`https://backpharma.onrender.com/api/create_event`, {
+    useFetch(`http://localhost:8000/api/create_event`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         },
@@ -206,7 +222,7 @@ const detailEvent = ref(null);
 const oneEvent = async (id) => {
     try {
         // Utilisez la méthode $fetch de Nuxt.js pour récupérer les données depuis l'API
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/${id}`, {
+        const response = await $fetch(`http://localhost:8000/api/event/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + token.value
             }
@@ -263,7 +279,7 @@ const mettreAjour = (id) => {
         })
         return
     }
-    useFetch(`https://backpharma.onrender.com/api/update/${id}`, {
+    useFetch(`http://localhost:8000/api/update/${id}`, {
         headers: {
             'Authorization': 'Bearer ' + token.value
         },
@@ -295,7 +311,7 @@ const lesPresents = ref(null);
 
 const getPresent = async (id) => {
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/listPresence/${id}`, {
+        const response = await $fetch(`http://localhost:8000/api/event/listPresence/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + token.value
             }
@@ -355,7 +371,7 @@ const lesAbsents = ref(null);
 
 const getAbsent = async (id) => {
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/listAbsence/${id}`, {
+        const response = await $fetch(`http://localhost:8000/api/event/listAbsence/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + token.value
             }
@@ -416,7 +432,7 @@ const lesPresentsFirstScan = ref(null);
 
 const getPresentFirstScan = async (id) => {
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/listPresence/${id}/first`, {
+        const response = await $fetch(`http://localhost:8000/api/event/listPresence/${id}/first`, {
             headers: {
                 'Authorization': 'Bearer ' + token.value
             }
@@ -477,7 +493,7 @@ const inviteRes = ref(null);
 const sendInvitation = async (id) => {
     state.loading = true;
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/invitation/${id}`, {
+        const response = await $fetch(`http://localhost:8000/api/event/invitation/${id}`, {
             method: "POST",
             headers: {
                 'Authorization': 'Bearer ' + token.value
@@ -510,7 +526,7 @@ const sendSingleInviation = async (event) => {
     // console.log("User " + state.idUserSearch + "Event" + event);
     state.loading = true;
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/event/${event}/${state.idUserSearch}`, {
+        const response = await $fetch(`http://localhost:8000/api/event/${event}/${state.idUserSearch}`, {
             method: "POST",
             headers: {
                 'Authorization': 'Bearer ' + token.value
@@ -538,7 +554,7 @@ const sendSingleInviation = async (event) => {
 const sendQr = async () => {
     state.loading = true;
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/sendQr`, {
+        const response = await $fetch(`http://localhost:8000/api/sendQr`, {
             method: "GET",
             headers: {
                 'Authorization': 'Bearer ' + token.value
@@ -574,7 +590,7 @@ const sendSingleQr = async (id) => {
         }
     });
     try {
-        const response = await $fetch(`https://backpharma.onrender.com/api/sendQrsingle/${id}`, {
+        const response = await $fetch(`http://localhost:8000/api/sendQrsingle/${id}`, {
             method: "GET",
             headers: {
                 'Authorization': 'Bearer ' + token.value
@@ -1358,7 +1374,7 @@ const sendSingleQr = async (id) => {
                                     {{ dean.email }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ dean.phone }}
+                                    {{ dean.points_total }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <!-- bouton rechecher  -->
@@ -1376,7 +1392,7 @@ const sendSingleQr = async (id) => {
                     </table>
 
                     <div class="flex flex-row mx-auto mt-5">
-                        <button type="button" @click="getPreviousEventsAll()"
+                        <button type="button" @click="getPreviousUser()"
                             class="bg-gray-800 text-white rounded-l-md border-r border-gray-100 py-2 hover:bg-red-700 hover:text-white px-3">
                             <div class="flex flex-row align-middle">
                                 <svg class="w-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
@@ -1388,7 +1404,7 @@ const sendSingleQr = async (id) => {
                                 <p class="ml-2">Prev</p>
                             </div>
                         </button>
-                        <button type="button" @click="getNextEventsAll()"
+                        <button type="button" @click="getNextUser()"
                             class="bg-gray-800 text-white rounded-r-md py-2 border-l border-gray-200 hover:bg-red-700 hover:text-white px-3">
                             <div class="flex flex-row align-middle">
                                 <span class="mr-2">Next</span>
@@ -1432,7 +1448,7 @@ export default {
     },
     async mounted() {
         let token = useCookie("token"); // utilisez useCookie ici sans le préfixe this
-        const response = await $fetch(`https://backpharma.onrender.com/api/searchevent`, {
+        const response = await $fetch(`http://localhost:8000/api/searchevent`, {
             headers: {
                 'Authorization': 'Bearer ' + token.value
             }

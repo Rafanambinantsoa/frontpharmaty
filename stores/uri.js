@@ -1,1 +1,1 @@
-export const uri = '​https://backpharma.onrender.com/api/';
+export const uri = 'http://localhost:3000/api/';
