@@ -163,6 +163,19 @@ export default {
                 console.log(res);
                 console.log(res.data.value.message)
                 if (res.data.value.message == "success") {
+                  //appeler un api qui sert a clore tout l'event qui ont depasser la date de fin
+                  const { data } = useFetch(`http://localhost:8000/api/users/actualistionPoint`, {
+                    method: 'POST',
+                }).then((res) => {
+                  console.log(res);
+                })
+
+                const { gaby } = useFetch(`http://localhost:8000/api/cloreEvent`, {
+                    method: 'PUT',
+                }).then((res) => {
+                  console.log(res);
+                })
+
                   // console.log(res.data.value.status);
                   Swal.fire({
                   icon: 'success',
